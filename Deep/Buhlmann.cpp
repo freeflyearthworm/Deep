@@ -7,29 +7,18 @@ float backup_Po[16] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
 float surfacePressure = 1;  //1 Bar surface Pressure
 float N2 = 0.79;            //78% Nitrogen
-long timer = 0;
-bool dive = false;
 
-void startDive() {
-  Serial.println("Start Dive");
-  timer = millis() + 1000;  //add first clockTick
-  dive = true;
-}
-void stopDive() {
-  Serial.println("Stop Dive");
-  timer = millis();
-  dive = false;
-}
-long getDiveTime() {
-  return (millis() - timer) / 1000;
-}
+struct gas{
+  float o2;
+  float partPressure;
+  float he;
+  bool isActive;
+};
+gas backGas = {0.21,1.4,0,true};
+gas DecoGas1 = {0.5,1.6,0,false};
+gas currentGas = backGas;
+
 void updateBuhlmann(float depth, int inc) {
-  if (!dive && depth > 1) {
-    startDive();
-  }
-  if (dive && depth <= 0.5) {
-    stopDive();
-  }
   float Pamb = depth * 0.1 + surfacePressure;  //depth pressure
   float Pi = (Pamb - 0.063) * N2;              //inertgas pressure
   for (int i = 0; i < 16; ++i) {
@@ -53,7 +42,6 @@ float getCeiling() {
 float getNDL(float depth) {
   float Pamb = depth * 0.1 + surfacePressure;
   float Pi = (Pamb - 0.0627) * N2;  //Pi/10
-  //float Po = (surfacePressure - 0.0627) * N2;
   float t;
   float NDL = 5940;
   for (int i = 0; i < 16; ++i) {
@@ -134,4 +122,7 @@ float getStopTime(float depth, float depth2) {
     }
   }
   return stopTime;
+}
+float getMOD(){
+return(10 * ((currentGas.partPressure / currentGas.o2) - surfacePressure));
 }

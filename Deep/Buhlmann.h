@@ -6,6 +6,7 @@
 void startDive();
 void updateBuhlmann(float depth, int inc);
 float getCeiling();
+float getMOD();
 long  getDiveTime();
 float getNDL(float depth);
 float getStopTime(float depth,float depth2);
